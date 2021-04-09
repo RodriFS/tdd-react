@@ -1,15 +1,16 @@
 import React, { useState } from 'react';
 import './App.css';
 
-function App() {
-  const [todoInputText, setTodoInputText] = useState<string>("");
-  const [todoList, setTodoList] = useState<{ todo: string, status: boolean}[]>([]);
+type UseTodoResult<T> = [
+  T[],
+  (todo: string) => void,
+  (id: string) => void,
+  (id: string) => void
+];
+function useTodo<T>(): UseTodoResult<T> {
+  const [todoList, setTodoList] = useState<(T | any)[]>([]);
 
-  const handleOnChange = (e: React.ChangeEvent<HTMLInputElement>) => {
-    setTodoInputText(e.target.value)
-  }
-
-  const handleOnAdd = () => {
+  const addTodo = (todoInputText: string) => {
     if (!todoInputText) {
       return;
     }
@@ -18,16 +19,15 @@ function App() {
       return;
     }
     setTodoList((prevState) => [...prevState, { todo: todoInputText, status: false }])
-    setTodoInputText("");
   }
 
-  const handleOnRemove = (e: React.MouseEvent<HTMLButtonElement>) => {
-    setTodoList((prevState) => prevState.filter(item => item.todo !== (e.target as HTMLButtonElement).id))
+  const removeTodo = (id: string) => {
+    setTodoList((prevState) => prevState.filter(item => item.todo !== id))
   }
 
-  const handleOnCheck = (e: React.ChangeEvent<HTMLInputElement>) => {
+  const toggleDone = (id: string) => {
     setTodoList((prevState) => prevState.map((item) => {
-      if (item.todo === e.target.id) {
+      if (item.todo === id) {
         return {
           ...item,
           status: !item.status
@@ -35,6 +35,31 @@ function App() {
       }
       return item
     }))
+  }
+
+
+  return [todoList, addTodo, removeTodo, toggleDone];
+}
+
+function App() {
+  const [todoInputText, setTodoInputText] = useState<string>("");
+  const [todoList, addTodo, removeTodo, toggleDone] = useTodo<{ todo: string, status: boolean}>();
+
+  const handleOnChange = (e: React.ChangeEvent<HTMLInputElement>) => {
+    setTodoInputText(e.target.value)
+  }
+
+  const handleOnAdd = () => {
+    addTodo(todoInputText);
+    setTodoInputText("")
+  }
+
+  const handleOnRemove = (e: React.MouseEvent<HTMLButtonElement>) => {
+    removeTodo((e.target as HTMLButtonElement).id)
+  }
+
+  const handleOnCheck = (e: React.ChangeEvent<HTMLInputElement>) => {
+    toggleDone((e.target as HTMLButtonElement).id)
   }
 
   return (

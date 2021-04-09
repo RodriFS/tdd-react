@@ -1,45 +1,6 @@
 import React, { useState } from 'react';
+import { useTodo } from './hooks/useTodo';
 import './App.css';
-
-type UseTodoResult<T> = [
-  T[],
-  (todo: string) => void,
-  (id: string) => void,
-  (id: string) => void
-];
-function useTodo<T>(): UseTodoResult<T> {
-  const [todoList, setTodoList] = useState<(T | any)[]>([]);
-
-  const addTodo = (todoInputText: string) => {
-    if (!todoInputText) {
-      return;
-    }
-    const alreadyExists = todoList.some(item => item.todo === todoInputText);
-    if (alreadyExists) {
-      return;
-    }
-    setTodoList((prevState) => [...prevState, { todo: todoInputText, status: false }])
-  }
-
-  const removeTodo = (id: string) => {
-    setTodoList((prevState) => prevState.filter(item => item.todo !== id))
-  }
-
-  const toggleDone = (id: string) => {
-    setTodoList((prevState) => prevState.map((item) => {
-      if (item.todo === id) {
-        return {
-          ...item,
-          status: !item.status
-        }
-      }
-      return item
-    }))
-  }
-
-
-  return [todoList, addTodo, removeTodo, toggleDone];
-}
 
 function App() {
   const [todoInputText, setTodoInputText] = useState<string>("");
